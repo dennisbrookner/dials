@@ -60,11 +60,24 @@ function(_cctbx_determine_libtbx_build_dir)
 
     if (NOT ${_LOAD_ENV_RESULT})
         # We found it via python import
-        message(DEBUG "Got libtbx build path: ${CCTBX_BUILD_DIR}")
+        message(DEBUG "Got libtbx build path: ${_LOAD_LIBTBX_BUILD_DIR}")
         set(CCTBX_BUILD_DIR "${_LOAD_LIBTBX_BUILD_DIR}" CACHE FILEPATH "Location of CCTBX build directory")
         return()
     endif()
 
+    message(DEBUG "Could not find through direct python; looking for libtbx.python as last resort")
+    execute_process(COMMAND "libtbx.python" -c "import libtbx.load_env; print(abs(libtbx.env.build_path))"
+                    RESULT_VARIABLE _TBX_LOAD_ENV_RESULT
+                    OUTPUT_VARIABLE _TBX_LOAD_LIBTBX_BUILD_DIR
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
+                    ERROR_QUIET)
+
+    if (NOT ${_TBX_LOAD_ENV_RESULT})
+        # We found it via python import
+        message(DEBUG "Got libtbx build path: ${_TBX_LOAD_LIBTBX_BUILD_DIR}")
+        set(CCTBX_BUILD_DIR "${_TBX_LOAD_LIBTBX_BUILD_DIR}" CACHE FILEPATH "Location of CCTBX build directory")
+        return()
+    endif()
 endfunction()
 
 # Read details for a single module out of libtbx_env and other info
