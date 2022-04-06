@@ -17,6 +17,7 @@ find_package(Python REQUIRED COMPONENTS Interpreter Development)
 find_package(CCTBX COMPONENTS cctbx scitbx ccp4io annlib REQUIRED)
 find_package(DXTBX REQUIRED)
 find_package(msgpack REQUIRED)
+find_package(OpenMP)
 
 # Find the boost::python library for this version of python
 find_package(Boost COMPONENTS thread "python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}" REQUIRED)
