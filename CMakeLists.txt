@@ -23,7 +23,6 @@ find_package(Boost COMPONENTS thread "python${Python_VERSION_MAJOR}${Python_VERS
 
 # Create Boost::python alias so we don't need to carry the python version around
 if(NOT TARGET Boost::python )
-    message(DEBUG "Adding Boost::python target")
     add_library(Boost::python INTERFACE IMPORTED)
     set_target_properties(Boost::python PROPERTIES
         INTERFACE_LINK_LIBRARIES  "python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}" )
@@ -38,11 +37,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY  "${CMAKE_BINARY_DIR}/lib")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 link_libraries(DXTBX::DXTBX)
-
-# add_tbx_module( dials INTERFACE )
-# target_include_directories( dials INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/.. )
-
-# add_libtbx_refresh_command( ${CMAKE_CURRENT_SOURCE_DIR}/libtbx_refresh.py )
 
 add_subdirectory(algorithms)
 add_subdirectory(array_family)
