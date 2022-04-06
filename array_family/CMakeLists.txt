@@ -1,4 +1,6 @@
-Python_add_library( dials_array_family_flex_ext MODULE
+Python_add_library(
+    dials_array_family_flex_ext
+    MODULE
     boost_python/flex_int6.cc
     boost_python/flex_shoebox.cc
     boost_python/flex_centroid.cc
@@ -8,7 +10,8 @@ Python_add_library( dials_array_family_flex_ext MODULE
     boost_python/flex_unit_cell.cc
     boost_python/flex_shoebox_extractor.cc
     boost_python/flex_binner.cc
-    boost_python/flex_ext.cc )
+    boost_python/flex_ext.cc
+)
 target_link_libraries(
     dials_array_family_flex_ext
     PUBLIC
