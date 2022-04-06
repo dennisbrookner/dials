@@ -6,8 +6,8 @@ project(dials)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # General cmake environment configuration
-include(CoverageBuildConfiguration) # Custom module to make turning coverage on easy
 include(SetDefaultBuildRelWithDebInfo) # Default builds to release with debug info
+include(CoverageBuildConfiguration) # Custom module to make turning coverage on easy
 include(AlwaysColourCompilation) # Always show coloured compiler output
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # Generate compile_commands.json
