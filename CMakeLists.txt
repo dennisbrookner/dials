@@ -22,7 +22,7 @@ find_package(msgpack REQUIRED)
 find_package(Boost COMPONENTS thread "python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}" REQUIRED)
 
 # Create Boost::python alias so we don't need to carry the python version around
-if(NOT TARGET Boost::python )
+if(NOT TARGET Boost::python)
     add_library(Boost::python INTERFACE IMPORTED)
     set_target_properties(Boost::python PROPERTIES
         INTERFACE_LINK_LIBRARIES  "python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}" )
