@@ -1,6 +1,6 @@
 {
   "libraries": {
-    "annlib": { "base": "ann" },
+    "annlib": { "base": "ann_cctbx;ann" },
     "ccp4io": { "base": "ccp4io" },
     "cctbx": { "base": "cctbx", "sgtbx::direct_space_asu": "cctbx_sgtbx_asu" },
     "fast_linalg": { "base": "fast_linalg" },
