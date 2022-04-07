@@ -17,5 +17,6 @@ target_link_libraries(
     PUBLIC
     CCTBX::cctbx
     Boost::python
+    CCTBX::scitbx::boost_python
     msgpackc
 )
