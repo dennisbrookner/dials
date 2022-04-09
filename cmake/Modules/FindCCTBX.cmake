@@ -36,37 +36,6 @@ if (NOT TARGET Python::Interpreter)
     find_package(Python COMPONENTS Interpreter REQUIRED)
 endif()
 
-function(_read_libtbx_env RESULT_VARIABLE)
-    cmake_path(SET _read_env_script NORMALIZE "${CMAKE_CURRENT_LIST_DIR}/../read_env.py")
-    if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-        set(_read_env_is_windows "--windows")
-    endif()
-    # Get the system prefix from python
-    execute_process(COMMAND ${Python_EXECUTABLE} -c "import sys; print(sys.prefix)"
-                    RESULT_VARIABLE _SYS_PREFIX_RESULT
-                    OUTPUT_VARIABLE _SYS_PREFIX
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if (${_SYS_PREFIX_RESULT})
-        message(FATAL_ERROR "Failed to read sys.prefix out of configured python")
-    endif()
-    # Now, use this an read out the libtbx_env
-    execute_process(
-        COMMAND ${Python_EXECUTABLE}
-        "${_read_env_script}"
-        "${CCTBX_BUILD_DIR}/libtbx_env"
-        "--build-path"
-        "${CCTBX_BUILD_DIR}"
-        "--sys-prefix"
-        "${_SYS_PREFIX}"
-        ${_read_env_is_windows}
-        OUTPUT_VARIABLE _env_json
-        RESULT_VARIABLE _result)
-    if (_result)
-        message(FATAL_ERROR "Failed to read environment file: ${CCTBX_BUILD_DIR}/libtbx_env")
-    endif()
-    set("${RESULT_VARIABLE}" "${_env_json}" PARENT_SCOPE)
-endfunction()
-
 # Find the location of the libtbx build directory - where libtbx_env is
 function(_cctbx_determine_libtbx_build_dir)
     # Try and read it from the environment
@@ -109,6 +78,37 @@ function(_cctbx_determine_libtbx_build_dir)
         set(CCTBX_BUILD_DIR "${_TBX_LOAD_LIBTBX_BUILD_DIR}" CACHE FILEPATH "Location of CCTBX build directory")
         return()
     endif()
+endfunction()
+
+function(_read_libtbx_env RESULT_VARIABLE)
+    cmake_path(SET _read_env_script NORMALIZE "${CMAKE_CURRENT_LIST_DIR}/../read_env.py")
+    if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+        set(_read_env_is_windows "--windows")
+    endif()
+    # Get the system prefix from python
+    execute_process(COMMAND ${Python_EXECUTABLE} -c "import sys; print(sys.prefix)"
+                    RESULT_VARIABLE _SYS_PREFIX_RESULT
+                    OUTPUT_VARIABLE _SYS_PREFIX
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (${_SYS_PREFIX_RESULT})
+        message(FATAL_ERROR "Failed to read sys.prefix out of configured python")
+    endif()
+    # Now, use this an read out the libtbx_env
+    execute_process(
+        COMMAND ${Python_EXECUTABLE}
+        "${_read_env_script}"
+        "${CCTBX_BUILD_DIR}/libtbx_env"
+        "--build-path"
+        "${CCTBX_BUILD_DIR}"
+        "--sys-prefix"
+        "${_SYS_PREFIX}"
+        ${_read_env_is_windows}
+        OUTPUT_VARIABLE _env_json
+        RESULT_VARIABLE _result)
+    if (_result)
+        message(FATAL_ERROR "Failed to read environment file: ${CCTBX_BUILD_DIR}/libtbx_env")
+    endif()
+    set("${RESULT_VARIABLE}" "${_env_json}" PARENT_SCOPE)
 endfunction()
 
 # Read details for a single module out of libtbx_env and other info
