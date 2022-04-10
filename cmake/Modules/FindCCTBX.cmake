@@ -80,17 +80,40 @@ function(_cctbx_determine_libtbx_build_dir)
     endif()
 endfunction()
 
-# Read details for a single module out of libtbx_env and other info
-function(_cctbx_read_module MODULE)
+function(_read_libtbx_env RESULT_VARIABLE)
     cmake_path(SET _read_env_script NORMALIZE "${CMAKE_CURRENT_LIST_DIR}/../read_env.py")
+    if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+        set(_read_env_is_windows "--windows")
+    endif()
+    # Get the system prefix from python
+    execute_process(COMMAND ${Python_EXECUTABLE} -c "import sys; print(sys.prefix)"
+                    RESULT_VARIABLE _SYS_PREFIX_RESULT
+                    OUTPUT_VARIABLE _SYS_PREFIX
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (${_SYS_PREFIX_RESULT})
+        message(FATAL_ERROR "Failed to read sys.prefix out of configured python")
+    endif()
+    # Now, use this an read out the libtbx_env
     execute_process(
-        COMMAND ${Python_EXECUTABLE} "${_read_env_script}" "${CCTBX_BUILD_DIR}/libtbx_env"
+        COMMAND ${Python_EXECUTABLE}
+        "${_read_env_script}"
+        "${CCTBX_BUILD_DIR}/libtbx_env"
+        "--build-path"
+        "${CCTBX_BUILD_DIR}"
+        "--sys-prefix"
+        "${_SYS_PREFIX}"
+        ${_read_env_is_windows}
         OUTPUT_VARIABLE _env_json
         RESULT_VARIABLE _result)
     if (_result)
-        message(SEND_ERROR "Failed to read environment file: ${CCTBX_BUILD_DIR}/libtbx_env")
-        return()
+        message(FATAL_ERROR "Failed to read environment file: ${CCTBX_BUILD_DIR}/libtbx_env")
     endif()
+    set("${RESULT_VARIABLE}" "${_env_json}" PARENT_SCOPE)
+endfunction()
+
+# Read details for a single module out of libtbx_env and other info
+function(_cctbx_read_module MODULE)
+    _read_libtbx_env(_env_json)
     # We now have a json representation of libtbx_env - extract the entry for this modile
     string(JSON _module_json ERROR_VARIABLE _error GET "${_env_json}" module_dict ${MODULE})
     if (NOT _module_json)
@@ -189,16 +212,21 @@ function(_cctbx_read_module MODULE)
         string(JSON _n_libs LENGTH "${_module_libs}")
         math(EXPR _n_libs "${_n_libs} - 1")
         foreach(_n RANGE ${_n_libs})
-        string(JSON _name MEMBER "${_module_libs}" ${_n})
-            set(_lib_searchname "_lib_${MODULE}_${_name}")
+            string(JSON _name MEMBER "${_module_libs}" ${_n})
             string(JSON _libnames GET "${_module_libs}" "${_name}")
+            set(_lib_searchname "_lib_${MODULE}_${_name}")
+
 
             # Find this library - or the first of a list of fallback options
             foreach(_libname "${_libnames}")
-                find_library(${_lib_searchname} ${_libname} HINTS ${_lib_path})
-                if(${_lib_searchname})
+                set(lib_specific_name "_liblocation_CCTBX_${MODULE}_${_libname}")
+                find_library(${lib_specific_name} ${_libname} HINTS ${_lib_path})
+                if(${lib_specific_name})
+                    set(${_lib_searchname} "${${lib_specific_name}}")
+                    mesage(DEBUG "Found ${lib_specific_name}=${${lib_specific_name}}")
                     break()
                 endif()
+                message(DEBUG "Didn't find lib${_libname} for ${MODULE}::${_name}")
             endforeach()
 
             if (NOT ${_lib_searchname})
